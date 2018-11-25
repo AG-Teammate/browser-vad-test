@@ -63,8 +63,14 @@
 
     this.setFilter(this.options.filter);
 
+    // 計算したエネルギー値
+    this.energy = 0;
+
+    // エネルギー値を計算済みかどうか。計算済みなら、this.ready.energy == true。
     this.ready = {};
-    this.vadState = false; // True when Voice Activity Detected
+    
+    // 音声アクティビティが検出中はtrue
+    this.vadState = false;
 
     // Energy detector props
     this.energy_offset = this.options.energy_offset;
@@ -77,11 +83,16 @@
     this.voiceTrendStart = 5;
     this.voiceTrendEnd = -5;
 
-    // Create analyser 
+    // AnalyserNodeクラス
     this.analyser = this.options.context.createAnalyser();
+
+    // 周波数領域の波形(振幅スペクトル)描画に関連するプロパティ。時間的にスペクトルを平滑化させるのに用いられる。
     this.analyser.smoothingTimeConstant = this.options.smoothingTimeConstant; // 0.99;
+
+    // 高速フーリエ変換を行う分割数の設定。必ず2の乗数
     this.analyser.fftSize = this.options.fftSize;
 
+    // getFloatFrequencyDataで取得したデータの格納先。frequencyBinCountはfftSizeの1/2になる。
     this.floatFrequencyData = new Float32Array(this.analyser.frequencyBinCount);
 
     // Setup local storage of the Linear FFT data
@@ -96,9 +107,10 @@
     // Connect scriptProcessorNode (Theretically, not required)
     this.scriptProcessorNode.connect(this.options.context.destination);
 
-    // Create callback to update/analyze floatFrequencyData
     var self = this;
+    // コールバック関数の設定
     this.scriptProcessorNode.onaudioprocess = function(event) {
+      // データの取得
       self.analyser.getFloatFrequencyData(self.floatFrequencyData);
       self.update();
       self.monitor();
@@ -118,6 +130,7 @@
       this.log_limit = typeof limit === 'number' ? limit : this.log_limit;
     }
 
+    // Log関数
     this.log = function(msg) {
       if(this.logging && this.log_i < this.log_limit) {
         this.log_i++;
@@ -127,15 +140,22 @@
       }
     }
 
+    // 更新関数
     this.update = function() {
       // Update the local version of the Linear FFT
+      
+      // fftは直近に取得したデータ
       var fft = this.floatFrequencyData;
+
       for(var i = 0, iLen = fft.length; i < iLen; i++) {
+        // Math.pow(底,指数) …… 指定された底と指数の累乗を返す
         this.floatFrequencyDataLinear[i] = Math.pow(10, fft[i] / 10);
       }
+
       this.ready = {};
     }
 
+    // エネルギー取得関数
     this.getEnergy = function() {
       if(this.ready.energy) {
         return this.energy;
@@ -154,16 +174,23 @@
       return energy;
     }
 
+    // モニター関数
     this.monitor = function() {
       var energy = this.getEnergy();
       var signal = energy - this.energy_offset;
 
       if(signal > this.energy_threshold_pos) {
-        this.voiceTrend = (this.voiceTrend + 1 > this.voiceTrendMax) ? this.voiceTrendMax : this.voiceTrend + 1;
+        this.voiceTrend++;
+        if(this.voiceTrend > this.voiceTrendMax) {
+          this.voiceTrend = this.voiceTrendMax;
+        }
       } else if(signal < -this.energy_threshold_neg) {
-        this.voiceTrend = (this.voiceTrend - 1 < this.voiceTrendMin) ? this.voiceTrendMin : this.voiceTrend - 1;
+        this.voiceTrend--;
+        if(this.voiceTrend < this.voiceTrendMin) {
+          this.voiceTrend = this.voiceTrendMin;
+        }
       } else {
-        // voiceTrend gets smaller
+        // トレンドを0に近づける
         if(this.voiceTrend > 0) {
           this.voiceTrend--;
         } else if(this.voiceTrend < 0) {
@@ -171,12 +198,14 @@
         }
       }
 
-      var start = false, end = false;
+      // 発話検出
+      var start = false;
+      // 終話検出
+      var end = false;
+
       if(this.voiceTrend > this.voiceTrendStart) {
-        // Start of speech detected
         start = true;
       } else if(this.voiceTrend < this.voiceTrendEnd) {
-        // End of speech detected
         end = true;
       }
 
