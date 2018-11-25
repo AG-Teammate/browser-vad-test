@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>VAD Test</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <script type="text/javascript" src="packages/vad.js/lib/vad.js"></script>
+    <script type="text/javascript">
+    <!--
+
+    // webブラウザ間のAudioContext (音声処理オブジェクト)表記ゆれを吸収する
+    window.AudioContext = window.AudioContext || window.webkitAudioContext;
+
+    // AudioContextを作成する
+    var audioContext = new AudioContext();
+
+    // 音声処理初期設定関数（下記getUserMediaのコールバックとして、マイクとの接続開始時に実行） 
+    function startUserMedia(stream) {
+
+        // 音声ストリーム音源オブジェクトの作成
+        var source = audioContext.createMediaStreamSource(stream);
+
+        // VAD のオプション設定 (詳細後述)
+        var options = {
+            source: source,  // 区間検出対象となるストリーム音源オブジェクトの指定
+            voice_stop: function() {console.log('voice_stop');}, // 音声区間検出開始時ハンドラ指定
+            voice_start: function() {console.log('voice_start');}, // 音声区間検出終了時ハンドラ指定
+            energy_threshold_ratio_pos: 8, // Signal must be twice the offset
+            energy_threshold_ratio_neg: 0.5, // Signal must be half the offset
+            energy_integration: 1, // Size of integration change compared to the signal per second.
+
+        }; 
+
+        // VADオブジェクト作成 (なお、本オブジェクトは以降使用する必要はない)
+        var vad = new VAD(options);
+    }
+
+    // webブラウザ間のgetUserMedia(音声／画像デバイスアクセス用オブジェクト)表記ゆれを吸収する
+    navigator.getUserMedia = navigator.getUserMedia || 
+                             navigator.mozGetUserMedia || 
+                             navigator.webkitGetUserMedia;
+
+    // getUserMediaを起動し、マイクアクセスを開始する
+    navigator.getUserMedia(
+        {audio: true},  // オプション(音声(audio)デバイスへアクセス)
+        startUserMedia, // 成功時コールバック処理 (上記にて定義したstartUserMedia関数)
+        function(e) {   // エラー時コールバック処理
+          console.log("No live audio input in this browser: " + e);
+        }
+    );
+
+    -->
+    </script>
+  </head>
+  <body>
+  </body>
+</html>
