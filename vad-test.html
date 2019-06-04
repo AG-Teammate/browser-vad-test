@@ -7,51 +7,71 @@
     <script type="text/javascript" src="packages/vad.js/lib/vad.js"></script>
     <script type="text/javascript">
     <!--
+    function initialize() {
+      // webï¿½Ö¥é¥¦ï¿½ï¿½ï¿½Ö¤ï¿½AudioContext (ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)É½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Û¼ï¿½ï¿½ï¿½ï¿½ï¿½
+      window.AudioContext = window.AudioContext || window.webkitAudioContext;
 
-    // web¥Ö¥é¥¦¥¶´Ö¤ÎAudioContext (²»À¼½èÍı¥ª¥Ö¥¸¥§¥¯¥È)É½µ­¤æ¤ì¤òµÛ¼ı¤¹¤ë
-    window.AudioContext = window.AudioContext || window.webkitAudioContext;
+      // AudioContextï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+      var audioContext = new AudioContext();
 
-    // AudioContext¤òºîÀ®¤¹¤ë
-    var audioContext = new AudioContext();
+      // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø¿ï¿½ï¿½Ê²ï¿½ï¿½ï¿½getUserMediaï¿½Î¥ï¿½ï¿½ï¿½ï¿½ï¿½Ğ¥Ã¥ï¿½ï¿½È¤ï¿½ï¿½Æ¡ï¿½ï¿½Ş¥ï¿½ï¿½ï¿½ï¿½È¤ï¿½ï¿½ï¿½Â³ï¿½ï¿½ï¿½Ï»ï¿½ï¿½Ë¼Â¹Ô¡ï¿½
+      function startUserMedia(stream) {
 
-    // ²»À¼½èÍı½é´üÀßÄê´Ø¿ô¡Ê²¼µ­getUserMedia¤Î¥³¡¼¥ë¥Ğ¥Ã¥¯¤È¤·¤Æ¡¢¥Ş¥¤¥¯¤È¤ÎÀÜÂ³³«»Ï»ş¤Ë¼Â¹Ô¡Ë 
-    function startUserMedia(stream) {
-
-        // ²»À¼¥¹¥È¥ê¡¼¥à²»¸»¥ª¥Ö¥¸¥§¥¯¥È¤ÎºîÀ®
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¥ê¡¼ï¿½à²»ï¿½ï¿½ï¿½ï¿½ï¿½Ö¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¤Îºï¿½ï¿½ï¿½
         var source = audioContext.createMediaStreamSource(stream);
 
-        // VAD ¤Î¥ª¥×¥·¥ç¥óÀßÄê (¾ÜºÙ¸å½Ò)
+        // VAD ï¿½Î¥ï¿½ï¿½×¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ (ï¿½ÜºÙ¸ï¿½ï¿½)
         var options = {
-            source: source,  // ¶è´Ö¸¡½ĞÂĞ¾İ¤È¤Ê¤ë¥¹¥È¥ê¡¼¥à²»¸»¥ª¥Ö¥¸¥§¥¯¥È¤Î»ØÄê
-            voice_stop: function() {console.log('voice_stop');}, // ²»À¼¶è´Ö¸¡½Ğ³«»Ï»ş¥Ï¥ó¥É¥é»ØÄê
-            voice_start: function() {console.log('voice_start');}, // ²»À¼¶è´Ö¸¡½Ğ½ªÎ»»ş¥Ï¥ó¥É¥é»ØÄê
-            energy_threshold_ratio_pos: 8, // Signal must be twice the offset
-            energy_threshold_ratio_neg: 0.5, // Signal must be half the offset
-            energy_integration: 1, // Size of integration change compared to the signal per second.
+          source: source,  // ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½Ğ¾İ¤È¤Ê¤ë¥¹ï¿½È¥ê¡¼ï¿½à²»ï¿½ï¿½ï¿½ï¿½ï¿½Ö¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¤Î»ï¿½ï¿½ï¿½
+          voice_stop: voice_stop, // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½Ğ³ï¿½ï¿½Ï»ï¿½ï¿½Ï¥ï¿½É¥ï¿½ï¿½ï¿½ï¿½
+          voice_start: voice_start, // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½Ğ½ï¿½Î»ï¿½ï¿½ï¿½Ï¥ï¿½É¥ï¿½ï¿½ï¿½ï¿½
+          energy_threshold_ratio_pos: 8, // Signal must be twice the offset
+          energy_threshold_ratio_neg: 0.5, // Signal must be half the offset
+          energy_integration: 1, // Size of integration change compared to the signal per second.
 
-        }; 
+        };
 
-        // VAD¥ª¥Ö¥¸¥§¥¯¥ÈºîÀ® (¤Ê¤ª¡¢ËÜ¥ª¥Ö¥¸¥§¥¯¥È¤Ï°Ê¹ß»ÈÍÑ¤¹¤ëÉ¬Í×¤Ï¤Ê¤¤)
+        // VADï¿½ï¿½ï¿½Ö¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Èºï¿½ï¿½ï¿½ (ï¿½Ê¤ï¿½ï¿½ï¿½ï¿½Ü¥ï¿½ï¿½Ö¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¤Ï°Ê¹ß»ï¿½ï¿½Ñ¤ï¿½ï¿½ï¿½É¬ï¿½×¤Ï¤Ê¤ï¿½)
         var vad = new VAD(options);
+      }
+
+      // webï¿½Ö¥é¥¦ï¿½ï¿½ï¿½Ö¤ï¿½getUserMedia(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç¥Ğ¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¥ï¿½ï¿½Ö¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)É½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Û¼ï¿½ï¿½ï¿½ï¿½ï¿½
+      navigator.getUserMedia = navigator.getUserMedia ||
+              navigator.mozGetUserMedia ||
+              navigator.webkitGetUserMedia;
+
+      // getUserMediaï¿½ï¿½Æ°ï¿½ï¿½ï¿½ï¿½ï¿½Ş¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ò³«»Ï¤ï¿½ï¿½ï¿½
+      navigator.getUserMedia(
+              {audio: true},  // ï¿½ï¿½ï¿½×¥ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½(audio)ï¿½Ç¥Ğ¥ï¿½ï¿½ï¿½ï¿½Ø¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
+              startUserMedia, // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ¥Ã¥ï¿½ï¿½ï¿½ï¿½ï¿½ (ï¿½åµ­ï¿½Ë¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½startUserMediaï¿½Ø¿ï¿½)
+              function (e) {   // ï¿½ï¿½ï¿½é¡¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ¥Ã¥ï¿½ï¿½ï¿½ï¿½ï¿½
+                console.log("No live audio input in this browser: " + e);
+              }
+      );
+
+      document.querySelectorAll(".startLink").forEach((el)=>el.remove());
+
+      const statusEl = document.querySelector(".status");
+      statusEl.innerText = "Please speak now...";
+      let speechStart = new Date();
+      let pauseStart = new Date();
+      function voice_start() {
+        let pauseForMs = (new Date() - pauseStart);
+        statusEl.innerText = "Speaking... (after " + pauseForMs + " ms pause)";
+        speechStart = new Date();
+      }
+
+      function voice_stop() {
+        let spokeForMs = (new Date() - speechStart);
+        statusEl.innerText = "Spoke for " + spokeForMs + " ms.";
+        pauseStart = new Date();
+      }
     }
-
-    // web¥Ö¥é¥¦¥¶´Ö¤ÎgetUserMedia(²»À¼¡¿²èÁü¥Ç¥Ğ¥¤¥¹¥¢¥¯¥»¥¹ÍÑ¥ª¥Ö¥¸¥§¥¯¥È)É½µ­¤æ¤ì¤òµÛ¼ı¤¹¤ë
-    navigator.getUserMedia = navigator.getUserMedia || 
-                             navigator.mozGetUserMedia || 
-                             navigator.webkitGetUserMedia;
-
-    // getUserMedia¤òµ¯Æ°¤·¡¢¥Ş¥¤¥¯¥¢¥¯¥»¥¹¤ò³«»Ï¤¹¤ë
-    navigator.getUserMedia(
-        {audio: true},  // ¥ª¥×¥·¥ç¥ó(²»À¼(audio)¥Ç¥Ğ¥¤¥¹¤Ø¥¢¥¯¥»¥¹)
-        startUserMedia, // À®¸ù»ş¥³¡¼¥ë¥Ğ¥Ã¥¯½èÍı (¾åµ­¤Ë¤ÆÄêµÁ¤·¤¿startUserMedia´Ø¿ô)
-        function(e) {   // ¥¨¥é¡¼»ş¥³¡¼¥ë¥Ğ¥Ã¥¯½èÍı
-          console.log("No live audio input in this browser: " + e);
-        }
-    );
-
     -->
     </script>
   </head>
   <body>
+    <a href="#" class="startLink" onclick="initialize()">Click here to start....</a>
+    <div class="status"></div>
   </body>
 </html>
